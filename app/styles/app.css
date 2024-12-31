@@ -1,3 +1,8 @@
+@font-face {
+  font-family: InterVariable;
+  src: url('../assets/fonts/InterVariable.ttf');
+}
+
 :root {
   --aside-width: 400px;
   --cart-aside-summary-height-with-discount: 300px;
@@ -159,6 +164,7 @@ button.reset:hover:not(:has(> *)) {
 */
 .header {
   align-items: center;
+  flex-direction: row;
   background: #fff;
   display: flex;
   height: var(--header-height);
@@ -166,6 +172,7 @@ button.reset:hover:not(:has(> *)) {
   position: sticky;
   top: 0;
   z-index: 1;
+  border: 1px solid red;
 }
 
 .header-menu-mobile-toggle {
@@ -183,6 +190,7 @@ button.reset:hover:not(:has(> *)) {
 .header-menu-desktop {
   display: none;
   grid-gap: 1rem;
+  font-family: InterVariable, sans-serif;
   @media (min-width: 45em) {
     display: flex;
     grid-gap: 1rem;
