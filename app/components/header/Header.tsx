@@ -5,7 +5,7 @@ import {
   useAnalytics,
   useOptimisticCart,
 } from '@shopify/hydrogen';
-import type {HeaderQuery, CartApiQueryFragment} from 'storefrontapi.generated';
+import type {HeaderQuery, CartApiQueryFragment} from '../../../storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 
 interface HeaderProps {
@@ -24,17 +24,21 @@ export function Header({
   publicStoreDomain,
 }: HeaderProps) {
   const {shop, menu} = header;
-  console.log("header", header);
   return (
     <header className="header">
       <HeaderMenu
-          menu={menu}
-          viewport="desktop"
-          primaryDomainUrl={header.shop.primaryDomain.url}
-          publicStoreDomain={publicStoreDomain}
+        menu={menu}
+        viewport="desktop"
+        primaryDomainUrl={header.shop.primaryDomain.url}
+        publicStoreDomain={publicStoreDomain}
       />
-      <NavLink prefetch="intent" to="/" style={{...activeLinkStyle, border: '1px solid purple'}} end>
-        <strong style={{fontFamily: 'Times New Roman'}}>jaxxYz®</strong>
+      <NavLink
+        prefetch="intent"
+        to="/"
+        className="header-logo-container"
+      >
+        <span id="header-logo-text">jaxxYz</span>
+        <span id="header-logo-text-trademark">®</span>
       </NavLink>
       <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
     </header>
@@ -56,7 +60,11 @@ export function HeaderMenu({
   const {close} = useAside();
 
   return (
-    <nav className={className} role="navigation" style={{border: '1px solid blue', marginRight: 'auto'}}>
+    <nav
+      className={className}
+      role="navigation"
+      style={{textTransform: 'uppercase'}}
+    >
       {viewport === 'mobile' && (
         <NavLink
           end
@@ -101,16 +109,20 @@ function HeaderCtas({
   cart,
 }: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
   return (
-    <nav className="header-ctas" role="navigation" style={{border: '1px solid red'}}>
+    <nav
+      className="header-ctas"
+      role="navigation"
+    >
       <HeaderMenuMobileToggle />
+      <SearchToggle />
       <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
         <Suspense fallback="Sign in">
           <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (isLoggedIn ? 'Account' : 'Sign in')}
+            {(isLoggedIn) => (isLoggedIn ? 'ACCOUNT' : 'SIGN IN')}
           </Await>
         </Suspense>
       </NavLink>
-      <SearchToggle />
+
       <CartToggle cart={cart} />
     </nav>
   );
@@ -132,7 +144,7 @@ function SearchToggle() {
   const {open} = useAside();
   return (
     <button className="reset" onClick={() => open('search')}>
-      Search
+      SEARCH
     </button>
   );
 }
@@ -155,7 +167,7 @@ function CartBadge({count}: {count: number | null}) {
         } as CartViewPayload);
       }}
     >
-      Cart {count === null ? <span>&nbsp;</span> : count}
+      CART l {count === null ? <span>&nbsp;</span> : count}
     </a>
   );
 }

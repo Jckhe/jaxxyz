@@ -1,5 +1,11 @@
+@font-face {
+  font-family: HelveticaOwn;
+  src: url('../assets/fonts/Helvetica.ttf');
+}
+
 body {
   font-family:
+  HelveticaOwn,
     system-ui,
     -apple-system,
     BlinkMacSystemFont,

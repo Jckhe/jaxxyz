@@ -1,5 +1,7 @@
+import type {ReactElement} from 'react';
 import {Suspense} from 'react';
 import {Await, NavLink} from '@remix-run/react';
+import NewsletterSignupForm from './NewsletterSignupForm';
 import type {FooterQuery, HeaderQuery} from 'storefrontapi.generated';
 
 interface FooterProps {
@@ -41,34 +43,69 @@ function FooterMenu({
   primaryDomainUrl: FooterProps['header']['shop']['primaryDomain']['url'];
   publicStoreDomain: string;
 }) {
+  const socialLinks = [
+    {type: 'INSTAGRAM', url: '#'},
+    {type: 'YOUTUBE', url: '#'},
+    {type: 'SPOTIFY', url: '#'},
+  ];
+  console.log('menu: ', menu);
   return (
     <nav className="footer-menu" role="navigation">
-      {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
-        if (!item.url) return null;
-        // if the url is internal, we strip the domain
-        const url =
-          item.url.includes('myshopify.com') ||
-          item.url.includes(publicStoreDomain) ||
-          item.url.includes(primaryDomainUrl)
-            ? new URL(item.url).pathname
-            : item.url;
-        const isExternal = !url.startsWith('/');
-        return isExternal ? (
-          <a href={url} key={item.id} rel="noopener noreferrer" target="_blank">
-            {item.title}
-          </a>
-        ) : (
-          <NavLink
-            end
-            key={item.id}
-            prefetch="intent"
-            style={activeLinkStyle}
-            to={url}
-          >
-            {item.title}
-          </NavLink>
-        );
-      })}
+      <div className="left-footer-container">
+        <div className="newsletter-caption-container">
+          <span>NEWSLETTER</span>
+          <p>
+            SUBSCRIBE FOR EXCLUSIVE OFFERS, MEMBER EVENTS
+            <br />
+            AND DROP ANNOUNCEMENTS
+          </p>
+        </div>
+        <div className="footer-menu-social-container">
+          {socialLinks.map(
+            (link): ReactElement => (
+              <NavLink to={link.url} key={link.type} >
+                {link.type}
+              </NavLink>
+            ),
+          )}
+        </div>
+      </div>
+      <div className="right-footer-container">
+        <NewsletterSignupForm />
+        <div className="footer-policy-container">
+          {(menu || FALLBACK_FOOTER_MENU).items.map((item) => {
+            if (!item.url) return null;
+            // if the url is internal, we strip the domain
+            const url =
+              item.url.includes('myshopify.com') ||
+              item.url.includes(publicStoreDomain) ||
+              item.url.includes(primaryDomainUrl)
+                ? new URL(item.url).pathname
+                : item.url;
+            const isExternal = !url.startsWith('/');
+            return isExternal ? (
+              <a
+                href={url}
+                key={item.id}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {item.title}
+              </a>
+            ) : (
+              <NavLink
+                end
+                key={item.id}
+                prefetch="intent"
+                style={activeLinkStyle}
+                to={url}
+              >
+                {item.title}
+              </NavLink>
+            );
+          })}
+        </div>
+      </div>
     </nav>
   );
 }
@@ -123,7 +160,8 @@ function activeLinkStyle({
   isPending: boolean;
 }) {
   return {
+    textTransform: 'uppercase',
     fontWeight: isActive ? 'bold' : undefined,
-    color: isPending ? 'grey' : 'white',
+    color: isPending ? 'grey' : 'black',
   };
 }

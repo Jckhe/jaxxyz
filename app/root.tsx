@@ -1,3 +1,5 @@
+import '@radix-ui/themes/styles.css';
+import {Theme} from '@radix-ui/themes';
 import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
 import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {
@@ -161,7 +163,11 @@ export function Layout({children}: {children?: React.ReactNode}) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <Theme>
+      <Outlet />
+    </Theme>
+  );
 }
 
 export function ErrorBoundary() {
