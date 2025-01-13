@@ -19,6 +19,7 @@ import appStyles from '~/styles/app.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 
+
 export type RootLoader = typeof loader;
 
 /**
@@ -163,11 +164,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
 }
 
 export default function App() {
-  return (
-    <Theme>
-      <Outlet />
-    </Theme>
-  );
+  return <Outlet />;
 }
 
 export function ErrorBoundary() {

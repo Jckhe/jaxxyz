@@ -63,7 +63,7 @@ function FooterMenu({
         <div className="footer-menu-social-container">
           {socialLinks.map(
             (link): ReactElement => (
-              <NavLink to={link.url} key={link.type} >
+              <NavLink to={link.url} key={link.type}>
                 {link.type}
               </NavLink>
             ),

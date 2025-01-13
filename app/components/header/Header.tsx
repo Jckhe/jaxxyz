@@ -38,7 +38,6 @@ export function Header({
         className="header-logo-container"
       >
         <span id="header-logo-text">jaxxYz</span>
-        <span id="header-logo-text-trademark">®</span>
       </NavLink>
       <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
     </header>

@@ -1,30 +1,78 @@
 import {MuiTelInput} from 'mui-tel-input';
 import type {ReactElement} from 'react';
-import {useState} from 'react';
-import {TextField, IconButton} from '@radix-ui/themes';
+import {useMemo, useEffect, useState} from 'react';
+import {TextField, IconButton, DropdownMenu, Button} from '@radix-ui/themes';
 import {ArrowRightIcon} from '@radix-ui/react-icons';
+import countryCodes from '../../app/lib/countryPhoneCodes.json';
 
-const EmailAddressForm = () => {
+const EmailAddressForm = ({onChange, value}) => {
   return (
-    <TextField.Root placeholder="ENTER YOUR EMAIL ADDRESS" className="newsletter-signup-input">
-      <TextField.Slot side="right" >
+    <TextField.Root
+      onChange={onChange}
+      placeholder="ENTER YOUR EMAIL ADDRESS"
+      className="newsletter-signup-input"
+      value={value}
+    >
+      <TextField.Slot side="right">
         <IconButton size="3" variant="ghost">
-          <ArrowRightIcon height="20" width="20" className="newsletter-signup-input-icon" />
+          <ArrowRightIcon
+            height="20"
+            width="20"
+            className="newsletter-signup-input-icon"
+          />
         </IconButton>
       </TextField.Slot>
     </TextField.Root>
   );
 };
 
-const PhoneNumberForm = () => {
+type Country = {
+  country: string;
+  code: string;
+};
+
+const CountryCodeFlagMenu = () => {
+  const [selectedCountry, setSelectedCountry] = useState(countryCodes[0]);
   return (
-      <TextField.Root placeholder="PHONE NUMBER" className="newsletter-signup-input">
-        <TextField.Slot side="right" >
-          <IconButton size="3" variant="ghost">
-            <ArrowRightIcon height="20" width="20" className="newsletter-signup-input-icon" />
-          </IconButton>
-        </TextField.Slot>
-      </TextField.Root>
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger>
+        <Button>
+          {selectedCountry.country}
+          <DropdownMenu.TriggerIcon />
+        </Button>
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Content size="2">
+        {countryCodes.map((country) => {
+          return (
+            <DropdownMenu.Item key={country.code}>
+              {country.code}
+            </DropdownMenu.Item>
+          );
+        })}
+      </DropdownMenu.Content>
+    </DropdownMenu.Root>
+  );
+};
+
+const PhoneNumberForm = ({onChange, value}) => {
+  return (
+    <TextField.Root
+      placeholder="PHONE NUMBER"
+      className="newsletter-signup-input"
+    >
+      <TextField.Slot side="left">
+        <CountryCodeFlagMenu />
+      </TextField.Slot>
+      <TextField.Slot side="right">
+        <IconButton size="3" variant="ghost">
+          <ArrowRightIcon
+            height="20"
+            width="20"
+            className="newsletter-signup-input-icon"
+          />
+        </IconButton>
+      </TextField.Slot>
+    </TextField.Root>
   );
 };
 
@@ -37,12 +85,12 @@ export default function NewsletterSignupForm(): ReactElement {
   };
 
   const handleEmailChange = (newValue: any) => {
-    setEmailAddress(newValue);
+    setEmailAddress(event.target.value);
   };
 
   return (
     <div className="newsletter-signup-form-container">
-      <EmailAddressForm />
+      <EmailAddressForm onChange={handleEmailChange} value={emailAddress} />
       <PhoneNumberForm />
     </div>
   );
