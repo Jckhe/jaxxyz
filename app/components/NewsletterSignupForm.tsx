@@ -59,18 +59,24 @@ const PhoneNumberForm = ({onChange, value}) => {
     <TextField.Root
       placeholder="PHONE NUMBER"
       className="newsletter-signup-input"
+      value={value}
+      onChange={onChange}
     >
       <TextField.Slot side="left">
         <CountryCodeFlagMenu />
       </TextField.Slot>
       <TextField.Slot side="right">
-        <IconButton size="3" variant="ghost">
-          <ArrowRightIcon
-            height="20"
-            width="20"
-            className="newsletter-signup-input-icon"
-          />
-        </IconButton>
+        {value && value.trim() !== '' && (
+          <TextField.Slot side="right">
+            <IconButton size="3" variant="ghost">
+              <ArrowRightIcon
+                height="20"
+                width="20"
+                className="newsletter-signup-input-icon"
+              />
+            </IconButton>
+          </TextField.Slot>
+        )}
       </TextField.Slot>
     </TextField.Root>
   );
@@ -81,7 +87,7 @@ export default function NewsletterSignupForm(): ReactElement {
   const [emailAddress, setEmailAddress] = useState('');
 
   const handlePhoneInput = (newValue: any) => {
-    setPhoneNumber(newValue);
+    setPhoneNumber(event.target.value);
   };
 
   const handleEmailChange = (newValue: any) => {
@@ -91,7 +97,7 @@ export default function NewsletterSignupForm(): ReactElement {
   return (
     <div className="newsletter-signup-form-container">
       <EmailAddressForm onChange={handleEmailChange} value={emailAddress} />
-      <PhoneNumberForm />
+      <PhoneNumberForm value={phoneNumber} onChange={handlePhoneInput} />
     </div>
   );
 }

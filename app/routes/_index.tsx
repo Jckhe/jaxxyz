@@ -1,11 +1,15 @@
 import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
 import {Await, useLoaderData, Link, type MetaFunction} from '@remix-run/react';
-import {Suspense} from 'react';
+import {Suspense, useEffect} from 'react';
 import {Image, Money} from '@shopify/hydrogen';
 import type {
   FeaturedCollectionFragment,
   RecommendedProductsQuery,
+  AllProductsWithTagQuery,
+  FrameProductsQuery,
 } from 'storefrontapi.generated';
+import {Box} from '@radix-ui/themes';
+import FrameOne from '../assets/frames/frame1.png';
 
 export const meta: MetaFunction = () => {
   return [{title: 'jaxxYz | homepage'}];
@@ -42,8 +46,8 @@ async function loadCriticalData({context}: LoaderFunctionArgs) {
  * Make sure to not throw any errors here, as it will cause the page to 500.
  */
 function loadDeferredData({context}: LoaderFunctionArgs) {
-  const recommendedProducts = context.storefront
-    .query(RECOMMENDED_PRODUCTS_QUERY)
+  const allProducts = context.storefront
+    .query(FRAME_PRODUCTS_QUERY)
     .catch((error) => {
       // Log query errors, but don't throw them so the page can still render
       console.error(error);
@@ -51,16 +55,39 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
     });
 
   return {
-    recommendedProducts,
+    allProducts,
   };
 }
 
+export const FramedProduct = () => {
+  return (
+    <div
+      style={{
+        backgroundImage: `url(${FrameOne})`,
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'contain', // Ensure the image covers the container
+        backgroundPosition: 'center', // Center the image
+        width: '500px', // Set explicit dimensions
+        height: '500px',
+      }}
+    ></div>
+  );
+};
+
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
+
+  useEffect(() => {
+    if (data) {
+      console.log(data);
+    }
+  }, [data]);
+
   return (
-    <div className="home-content-container" style={{border: '1px solid red'}}>
+    <div className="home-content-container">
       {/*<FeaturedCollection collection={data.featuredCollection} />*/}
-      <RecommendedProducts products={data.recommendedProducts} />
+      <RecommendedProducts products={data.allProducts} />
+      <FramedProduct />
     </div>
   );
 }
@@ -90,43 +117,51 @@ function FeaturedCollection({
 function RecommendedProducts({
   products,
 }: {
-  products: Promise<RecommendedProductsQuery | null>;
+  products: Promise<FrameProductsQuery | null>;
 }) {
   return (
     <div className="recommended-products">
       <h2>Recommended Products</h2>
       <Suspense fallback={<div>Loading...</div>}>
         <Await resolve={products}>
-          {(response) => (
-            <div className="recommended-products-grid">
-              {response
-                ? response.products.nodes.map((product) => (
-                    <Link
-                      key={product.id}
-                      className="recommended-product"
-                      to={`/products/${product.handle}`}
-                    >
-                      <Image
-                        data={product.images.nodes[0]}
-                        aspectRatio="1/1"
-                        sizes="(min-width: 45em) 20vw, 50vw"
-                      />
-                      <h4>{product.title}</h4>
-                      <small>
-                        <Money data={product.priceRange.minVariantPrice} />
-                      </small>
-                    </Link>
-                  ))
-                : null}
-            </div>
-          )}
+          {(response) => {
+            if (!response) return null;
+
+            // Sort the products by the numeric value in their "frame-*" tag
+            const sortedProducts = response.products.nodes.sort((a, b) => {
+              const aTagNumber = parseInt(a.tags[0].split('-')[1], 10);
+              const bTagNumber = parseInt(b.tags[0].split('-')[1], 10);
+              return aTagNumber - bTagNumber;
+            });
+
+            return (
+              <div className="recommended-products-grid">
+                {sortedProducts.map((product) => (
+                  <Link
+                    key={product.id}
+                    className="recommended-product"
+                    to={`/products/${product.handle}`}
+                  >
+                    <Image
+                      data={product.images.nodes[0]}
+                      aspectRatio="1/1"
+                      sizes="(min-width: 45em) 20vw, 50vw"
+                    />
+                    <h4>{product.title}</h4>
+                    <small>
+                      <Money data={product.priceRange.minVariantPrice} />
+                    </small>
+                  </Link>
+                ))}
+              </div>
+            );
+          }}
         </Await>
       </Suspense>
       <br />
     </div>
   );
 }
-
 const FEATURED_COLLECTION_QUERY = `#graphql
   fragment FeaturedCollection on Collection {
     id
@@ -176,6 +211,70 @@ const RECOMMENDED_PRODUCTS_QUERY = `#graphql
     products(first: 4, sortKey: UPDATED_AT, reverse: true) {
       nodes {
         ...RecommendedProduct
+      }
+    }
+  }
+` as const;
+
+const ALL_PRODUCTS_WITH_TAG_QUERY = `#graphql
+  fragment ProductDetails on Product {
+    id
+    title
+    handle
+    tags
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+    images(first: 1) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
+  }
+  query AllProductsWithTag($country: CountryCode, $language: LanguageCode) 
+    @inContext(country: $country, language: $language) {
+    products(first: 250, query: "tag:homepage") {
+      nodes {
+        ...ProductDetails
+      }
+    }
+  }
+` as const;
+
+const FRAME_PRODUCTS_QUERY = `#graphql
+  fragment ProductDetailsWithFrameTag on Product {
+    id
+    title
+    handle
+    tags
+    priceRange {
+      minVariantPrice {
+        amount
+        currencyCode
+      }
+    }
+    images(first: 1) {
+      nodes {
+        id
+        url
+        altText
+        width
+        height
+      }
+    }
+  }
+  query FrameProducts($country: CountryCode, $language: LanguageCode) 
+    @inContext(country: $country, language: $language) {
+    products(first: 250, query: "tag:frame") {
+      nodes {
+        ...ProductDetailsWithFrameTag
       }
     }
   }

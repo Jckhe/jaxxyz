@@ -48,7 +48,6 @@ function FooterMenu({
     {type: 'YOUTUBE', url: '#'},
     {type: 'SPOTIFY', url: '#'},
   ];
-  console.log('menu: ', menu);
   return (
     <nav className="footer-menu" role="navigation">
       <div className="left-footer-container">
