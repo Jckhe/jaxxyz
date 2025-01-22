@@ -18,11 +18,6 @@ export const frameSrcObject = {
     // Add more frames here...
 };
 
-// interface FramedProductProps {
-//   product: FrameProduct;
-//   frameType: keyof typeof frameSrcObject;
-// }
-
 
 
 interface FramedProductProps {
