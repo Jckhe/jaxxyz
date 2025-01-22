@@ -1,6 +1,6 @@
 import FrameOne from '~/assets/frames/frame1.png';
 import FrameTwo from '~/assets/frames/frame2.png';
-import FrameThree from '~/assets/frames/frame3.png';
+import FrameThree from '~/assets/frames/frame3h.png';
 import type {FrameProduct} from '~/lib/products';
 import {Image, Money} from '@shopify/hydrogen';
 import {Link} from '@remix-run/react';
@@ -15,7 +15,6 @@ export const frameSrcObject = {
     frame1: { src: FrameOne, width: '600px', height: '800px' },
     frame2: { src: FrameTwo, width: '400px', height: '550px' },
     frame3: { src: FrameThree, width: '300px', height: '400px' },
-    // Add more frames here...
 };
 
 
