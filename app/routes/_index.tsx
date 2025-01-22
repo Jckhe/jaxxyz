@@ -9,7 +9,7 @@ import type {
   FrameProductsQuery,
 } from 'storefrontapi.generated';
 import {Box} from '@radix-ui/themes';
-import FrameOne from '../assets/frames/frame1.png';
+import {FramedProduct, frameSrcObject} from '~/components/frames/FramedProduct';
 
 export const meta: MetaFunction = () => {
   return [{title: 'jaxxYz | homepage'}];
@@ -59,20 +59,76 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
   };
 }
 
-export const FramedProduct = () => {
+const FramedProductsCanvas = ({ products }: { products: Promise<any> }) => {
+  const layout = [
+    { frameId: 'frame1', productIndex: 0 }, // Product frame
+    { frameId: 'frame2', productIndex: 1 }, // Product frame
+    { frameId: 'frame3', productIndex: undefined }, // Empty frame
+    // Add more frame layout configurations as needed
+  ];
+
   return (
-    <div
-      style={{
-        backgroundImage: `url(${FrameOne})`,
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'contain', // Ensure the image covers the container
-        backgroundPosition: 'center', // Center the image
-        width: '500px', // Set explicit dimensions
-        height: '500px',
-      }}
-    ></div>
+      <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '16px', // Space between frames
+            padding: '16px',
+            width: '100%',
+          }}
+      >
+        <Suspense fallback={<div>Loading...</div>}>
+          <Await resolve={products}>
+            {(resolvedProducts) => {
+              const productNodes = resolvedProducts?.products?.nodes || [];
+              return layout.map((item, index) => (
+                  <FramedProduct
+                      key={index}
+                      frameId={item.frameId as keyof typeof frameSrcObject}
+                      product={item.productIndex !== undefined ? productNodes[item.productIndex] : undefined}
+                      onClick={
+                        item.productIndex === undefined // Empty frame
+                            ? () => (window.location.href = '/collections/all')
+                            : undefined
+                      }
+                  />
+              ));
+            }}
+          </Await>
+        </Suspense>
+      </div>
   );
 };
+
+// const FramedProductsCanvas = ({products}) => {
+//   return (
+//     <div style={{width: '100%', height: '90vh', border: '1px solid purple'}}>
+//       <Suspense fallback={<div>Loading...</div>}>
+//         <Await resolve={products}>
+//           {(resolvedProducts) => {
+//             console.log('Resolved Products:', resolvedProducts); // Log the structure
+//
+//             if (
+//               !resolvedProducts ||
+//               !resolvedProducts.products ||
+//               !resolvedProducts.products.nodes ||
+//               resolvedProducts.products.nodes.length === 0
+//             ) {
+//               return <div>No products available.</div>;
+//             }
+//
+//             return (
+//               <FramedProduct
+//                 product={resolvedProducts.products.nodes[0]}
+//                 frameType="frame1"
+//               />
+//             );
+//           }}
+//         </Await>
+//       </Suspense>
+//     </div>
+//   );
+// };
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
@@ -85,12 +141,14 @@ export default function Homepage() {
 
   return (
     <div className="home-content-container">
-      {/*<FeaturedCollection collection={data.featuredCollection} />*/}
-      <RecommendedProducts products={data.allProducts} />
-      <FramedProduct />
+
+      <FramedProductsCanvas products={data.allProducts} />
     </div>
   );
 }
+
+// {/*<FeaturedCollection collection={data.featuredCollection} />*/}
+// {/*<RecommendedProducts products={data.allProducts} />*/}
 
 function FeaturedCollection({
   collection,
