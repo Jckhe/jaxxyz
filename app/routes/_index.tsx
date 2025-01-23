@@ -9,7 +9,8 @@ import type {
   FrameProductsQuery,
 } from 'storefrontapi.generated';
 import {Box} from '@radix-ui/themes';
-import {FramedProduct, frameSrcObject} from '~/components/frames/FramedProduct';
+import type {frameSrcObject} from '~/components/frames/FramedProduct';
+import {FramedProduct} from '~/components/frames/FramedProduct';
 
 export const meta: MetaFunction = () => {
   return [{title: 'jaxxYz | homepage'}];
@@ -60,69 +61,129 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
 }
 
 const FramedProductsCanvas = ({ products }: { products: Promise<any> }) => {
-  const layout = [
-    { frameId: 'frame1', productIndex: 0 }, // Product frame
-    { frameId: 'frame2', productIndex: 1 }, // Product frame
-    { frameId: 'frame3', productIndex: undefined }, // Empty frame
-    // Add more frame layout configurations as needed
-  ];
+    const layout = [
+        { frameId: 'frame1', tileIndex: 5 }, // Top-left
+        { frameId: 'frame2', tileIndex: 7}, // Center
+        // { frameId: 'frame3', tileIndex: 8 }, // Bottom-right
+    ];
 
-  return (
-      <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '16px', // Space between frames
-            padding: '16px',
-            width: '100%',
-          }}
-      >
-        <Suspense fallback={<div>Loading...</div>}>
-          <Await resolve={products}>
-            {(resolvedProducts) => {
-              const productNodes = resolvedProducts?.products?.nodes || [];
-              return layout.map((item, index) => (
-                  <FramedProduct
-                      key={index}
-                      frameId={item.frameId as keyof typeof frameSrcObject}
-                      product={item.productIndex !== undefined ? productNodes[item.productIndex] : undefined}
-                      onClick={
-                        item.productIndex === undefined // Empty frame
-                            ? () => (window.location.href = '/collections/all')
-                            : undefined
-                      }
-                  />
-              ));
+    const tileCount = 12; // 3x3 layout
+
+    return (
+        <div
+            style={{
+                display: 'flex',
+                flexWrap: 'wrap', // Wrap tiles into rows
+                width: '90%', // Fixed width for the container
+                height: '95vh', // Fixed height for the container
+                border: '1px solid red', // Outer border for the whole canvas
             }}
-          </Await>
-        </Suspense>
-      </div>
-  );
+        >
+            <Suspense fallback={<div>Loading...</div>}>
+                <Await resolve={products}>
+                    {(resolvedProducts) => {
+                        const productNodes = resolvedProducts?.products?.nodes || [];
+                        let productIndex = 0; // Track product order for placement
+
+                        return Array.from({ length: tileCount }).map((_, tileIndex) => {
+                            // Find layout item for this tile
+                            const layoutItem = layout.find((item) => item.tileIndex === tileIndex);
+                            const product = layoutItem ? productNodes[productIndex++] : undefined;
+
+                            return (
+                                <div
+                                    key={tileIndex}
+                                    style={{
+                                        width: '33.33%', // Each tile is 1/3 of the container's width
+                                        height: '33.33%', // Each tile is 1/3 of the container's height
+                                        boxSizing: 'border-box', // Include border in the width/height calculation
+                                        border: '1px solid rgba(0, 0, 0, 0.2)', // Inner border for each tile
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        overflow: 'visible', // Allow content to overflow
+                                    }}
+                                >
+                                    {/* Render FramedProduct if applicable */}
+                                    {layoutItem && layoutItem.frameId && (
+                                        <FramedProduct
+                                            frameId={layoutItem.frameId as keyof typeof frameSrcObject}
+                                            product={product} // Render the next product in order
+                                            onClick={
+                                                !product
+                                                    ? () => (window.location.href = '/collections/all')
+                                                    : undefined
+                                            }
+                                        />
+                                    )}
+                                </div>
+                            );
+                        });
+                    }}
+                </Await>
+            </Suspense>
+        </div>
+    );
 };
 
-// const FramedProductsCanvas = ({products}) => {
+
+// const FramedProductsCanvas = ({products}: {products: Promise<any>}) => {
+//   const layout = [
+//     {frameId: 'frame1', productIndex: 0, column: 1}, // Product frame
+//     // {frameId: 'frame2', productIndex: 1, column: 2}, // Product frame
+//     // {frameId: 'frame3', productIndex: undefined, column: 3}, // Empty frame
+//     // {frameId: 'frame1', productIndex: 2, column: 4}, // Product frame
+//     // {frameId: 'frame2', productIndex: undefined, column: 1}, // Empty frame
+//     // Add more layout configurations as needed
+//   ];
+//
+//   // Group frames by columns
+//   const groupedByColumns = layout.reduce((acc, item) => {
+//     acc[item.column] = acc[item.column] || [];
+//     acc[item.column].push(item);
+//     return acc;
+//   }, {} as Record<number, typeof layout>);
+//
 //   return (
-//     <div style={{width: '100%', height: '90vh', border: '1px solid purple'}}>
+//     <div
+//       style={{
+//         display: 'grid',
+//         gridTemplateColumns: 'repeat(5, 1fr)',
+//         padding: '16px',
+//         width: '100vw',
+//       }}
+//     >
 //       <Suspense fallback={<div>Loading...</div>}>
 //         <Await resolve={products}>
 //           {(resolvedProducts) => {
-//             console.log('Resolved Products:', resolvedProducts); // Log the structure
+//             const productNodes = resolvedProducts?.products?.nodes || [];
 //
-//             if (
-//               !resolvedProducts ||
-//               !resolvedProducts.products ||
-//               !resolvedProducts.products.nodes ||
-//               resolvedProducts.products.nodes.length === 0
-//             ) {
-//               return <div>No products available.</div>;
-//             }
-//
-//             return (
-//               <FramedProduct
-//                 product={resolvedProducts.products.nodes[0]}
-//                 frameType="frame1"
-//               />
-//             );
+//             return Object.keys(groupedByColumns).map((columnKey) => (
+//               <div
+//                 key={`column-${columnKey}`}
+//                 style={{
+//                   border: '1px solid rgba(0, 0, 0, 0.2)', // Border for each column
+//                   padding: '8px', // Optional padding inside the column
+//                 }}
+//               >
+//                 {groupedByColumns[Number(columnKey)].map((item, index) => (
+//                   <FramedProduct
+//                     key={index}
+//                     frameId={item.frameId as keyof typeof frameSrcObject}
+//                     product={
+//                       item.productIndex !== undefined
+//                         ? productNodes[item.productIndex]
+//                         : undefined
+//                     }
+//                     onClick={
+//                       item.productIndex === undefined // Empty frame
+//                         ? () => (window.location.href = '/collections/all')
+//                         : undefined
+//                     }
+//                   />
+//                 ))}
+//               </div>
+//             ));
 //           }}
 //         </Await>
 //       </Suspense>
@@ -141,7 +202,6 @@ export default function Homepage() {
 
   return (
     <div className="home-content-container">
-
       <FramedProductsCanvas products={data.allProducts} />
     </div>
   );

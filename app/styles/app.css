@@ -244,6 +244,21 @@ button.reset:hover:not(:has(> *)) {
   margin-right: 2.5%;
 }
 
+
+/*
+* --------------------------------------------------
+* components/Homepage
+* --------------------------------------------------
+*/
+
+
+.home-content-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
 /*
 * --------------------------------------------------
 * components/Footer
@@ -274,7 +289,6 @@ button.reset:hover:not(:has(> *)) {
   justify-content: start;
   gap: 1rem;
   margin-top: auto;
-  /*border: 1px solid red;*/
 }
 
 .footer-menu-social-container a {

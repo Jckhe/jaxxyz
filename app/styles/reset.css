@@ -3,6 +3,16 @@
   src: url('../assets/fonts/Helvetica.ttf');
 }
 
+
+html {
+  min-height: 200vh;
+}
+
+main {
+  min-height: 100vh;
+}
+
+
 body {
   font-family:
   HelveticaOwn,
@@ -82,10 +92,17 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
 }
+
+
 
 body > main {
   margin: 0 1rem 1rem 1rem;
+
 }
 
 section {
