@@ -17,10 +17,17 @@
   --color-dark: #000;
   --color-light: #fff;
   font-family: HelveticaOwn, sans-serif;
+  height: 100vh;
 }
 
 img {
   border-radius: 4px;
+}
+
+
+
+.radix-themes {
+  height: auto!important; /* or min-height: 100%; */
 }
 
 /*
@@ -180,7 +187,7 @@ button.reset:hover:not(:has(> *)) {
   padding: 1rem 1rem 0;
   /*position: sticky;*/
   top: 0;
-  z-index: 1;
+  z-index: 10;
   font-family: HelveticaOwn, sans-serif;
   font-size: 0.85rem;
 }
@@ -256,7 +263,7 @@ button.reset:hover:not(:has(> *)) {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  height: 100%;
 }
 
 /*

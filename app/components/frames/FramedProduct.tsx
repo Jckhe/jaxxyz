@@ -1,28 +1,67 @@
-import FrameOne from '~/assets/frames/frame1.png';
-import FrameTwo from '~/assets/frames/frame2.png';
-import FrameThree from '~/assets/frames/frame3h.png';
+import frame1 from '~/assets/frames/frame1.png';
+import frame2 from '~/assets/frames/frame2.png';
+import frame3 from '~/assets/frames/frame3h.png';
+import frame8 from '~/assets/frames/frame8.png';
+import frame5 from '~/assets/frames/frame5.png';
 import type {FrameProduct} from '~/lib/products';
 import {Image, Money} from '@shopify/hydrogen';
 import {Link} from '@remix-run/react';
+import type {CSSProperties} from 'react';
 
-export const frameSrcObject = {
-  frame1: {src: FrameOne, width: '300px', height: '357px'},
-  frame2: {src: FrameTwo, width: '280px', height: '350px'},
-  frame3: {src: FrameThree, width: '300px', height: '400px'},
+type Frame = {
+  src: string; // The `FrameOne`, `FrameTwo`, etc., should resolve to string
+  width: string; // Width as a string with a unit (e.g., '300px')
+  height: string; // Height as a string with a unit (e.g., '357px')
+  frameStyle?: CSSProperties;
+  productStyle?: CSSProperties;
+  frameImageStyle?: CSSProperties;
+};
+
+export type FrameSrcObject = Record<string, Frame>;
+
+export const frameSrcObject: FrameSrcObject = {
+  frame1: {src: frame1, width: '320px', height: '400px'},
+  frame2: {src: frame2, width: '280px', height: '350px'},
+  frame3: {
+    src: frame3,
+    width: '135px',
+    height: '180px',
+      frameStyle: {boxShadow: 'none'}
+  },
+    frame5: {
+      src: frame5,
+        width: '405px',
+        height: '250px',
+        frameStyle: {
+          boxShadow: 'none',
+        }
+    },
+  frame8: {
+    src: frame8,
+    width: '130px',
+    height: '130px',
+      frameStyle: {position: 'relative'}
+  },
 };
 
 interface FramedProductProps {
   product?: FrameProduct; // Optional for empty frames
   frameId: keyof typeof frameSrcObject; // ID of the frame to use
   onClick?: () => void; // Optional click handler for empty frames
+  frameStyle?: CSSProperties;
+  productStyle?: CSSProperties;
+  frameImageStyle?: CSSProperties;
 }
 
 export const FramedProduct = ({
   product,
   frameId,
   onClick,
-}: FramedProductProps) => {
-  const frame = frameSrcObject[frameId]; // Retrieve frame config by ID
+}: // frameStyle,
+// productStyle,
+//   frameImageStyle,
+FramedProductProps) => {
+  const frame: Frame = frameSrcObject[frameId]; // Retrieve frame config by ID
 
   return (
     <div
@@ -42,6 +81,7 @@ export const FramedProduct = ({
                 0 0.25em 0.75em -0.05em rgba(0,0,0,0.5),
                  inset 0 0 0.7em rgba(0,0,0,0.3),
                 inset 0 0.05em 0.1em rgba(255,255,255,0.15)`,
+          ...frame.frameStyle,
       }}
     >
       {/* Frame Image */}
@@ -56,6 +96,7 @@ export const FramedProduct = ({
           objectFit: 'fill',
           zIndex: 2,
           pointerEvents: 'none',
+            ...frame.frameImageStyle,
         }}
         alt={`Frame ${frameId}`}
       />
@@ -80,6 +121,8 @@ export const FramedProduct = ({
               objectFit: 'contain',
               objectPosition: 'center',
               filter: 'drop-shadow(0px 6px 8px rgba(0, 0, 0, 0.15))',
+                ...frame.productStyle,
+
             }}
           />
         </Link>

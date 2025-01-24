@@ -1,7 +1,13 @@
 import {MuiTelInput} from 'mui-tel-input';
 import type {ReactElement} from 'react';
 import {useMemo, useEffect, useState} from 'react';
-import {TextField, IconButton, DropdownMenu, Button} from '@radix-ui/themes';
+import {
+  TextField,
+  IconButton,
+  DropdownMenu,
+  Button,
+  Theme,
+} from '@radix-ui/themes';
 import {ArrowRightIcon} from '@radix-ui/react-icons';
 import countryCodes from '../../app/lib/countryPhoneCodes.json';
 
@@ -96,8 +102,10 @@ export default function NewsletterSignupForm(): ReactElement {
 
   return (
     <div className="newsletter-signup-form-container">
-      <EmailAddressForm onChange={handleEmailChange} value={emailAddress} />
-      <PhoneNumberForm value={phoneNumber} onChange={handlePhoneInput} />
+      {/*<Theme hasBackground={false}>*/}
+      {/*  <EmailAddressForm onChange={handleEmailChange} value={emailAddress} />*/}
+      {/*  <PhoneNumberForm value={phoneNumber} onChange={handlePhoneInput} />*/}
+      {/*</Theme>*/}
     </div>
   );
 }

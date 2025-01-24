@@ -4,14 +4,6 @@
 }
 
 
-html {
-  min-height: 200vh;
-}
-
-main {
-  min-height: 100vh;
-}
-
 
 body {
   font-family:
@@ -91,7 +83,7 @@ pre {
 body {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 145dvh;
   overflow-x: hidden;
   width: 100%;
   max-width: 100%;
@@ -100,9 +92,13 @@ body {
 
 
 
-body > main {
-  margin: 0 1rem 1rem 1rem;
 
+body > main {
+  height: 120dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  justify-self: center;
 }
 
 section {

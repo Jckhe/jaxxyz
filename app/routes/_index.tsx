@@ -9,7 +9,10 @@ import type {
   FrameProductsQuery,
 } from 'storefrontapi.generated';
 import {Box} from '@radix-ui/themes';
-import type {frameSrcObject} from '~/components/frames/FramedProduct';
+import type {
+  FrameSrcObject,
+  frameSrcObject,
+} from '~/components/frames/FramedProduct';
 import {FramedProduct} from '~/components/frames/FramedProduct';
 
 export const meta: MetaFunction = () => {
@@ -59,137 +62,149 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
     allProducts,
   };
 }
-
-const FramedProductsCanvas = ({ products }: { products: Promise<any> }) => {
-    const layout = [
-        { frameId: 'frame1', tileIndex: 5 }, // Top-left
-        { frameId: 'frame2', tileIndex: 7}, // Center
-        // { frameId: 'frame3', tileIndex: 8 }, // Bottom-right
-    ];
-
-    const tileCount = 12; // 3x3 layout
-
-    return (
-        <div
-            style={{
-                display: 'flex',
-                flexWrap: 'wrap', // Wrap tiles into rows
-                width: '90%', // Fixed width for the container
-                height: '95vh', // Fixed height for the container
-                border: '1px solid red', // Outer border for the whole canvas
-            }}
-        >
-            <Suspense fallback={<div>Loading...</div>}>
-                <Await resolve={products}>
-                    {(resolvedProducts) => {
-                        const productNodes = resolvedProducts?.products?.nodes || [];
-                        let productIndex = 0; // Track product order for placement
-
-                        return Array.from({ length: tileCount }).map((_, tileIndex) => {
-                            // Find layout item for this tile
-                            const layoutItem = layout.find((item) => item.tileIndex === tileIndex);
-                            const product = layoutItem ? productNodes[productIndex++] : undefined;
-
-                            return (
-                                <div
-                                    key={tileIndex}
-                                    style={{
-                                        width: '33.33%', // Each tile is 1/3 of the container's width
-                                        height: '33.33%', // Each tile is 1/3 of the container's height
-                                        boxSizing: 'border-box', // Include border in the width/height calculation
-                                        border: '1px solid rgba(0, 0, 0, 0.2)', // Inner border for each tile
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        overflow: 'visible', // Allow content to overflow
-                                    }}
-                                >
-                                    {/* Render FramedProduct if applicable */}
-                                    {layoutItem && layoutItem.frameId && (
-                                        <FramedProduct
-                                            frameId={layoutItem.frameId as keyof typeof frameSrcObject}
-                                            product={product} // Render the next product in order
-                                            onClick={
-                                                !product
-                                                    ? () => (window.location.href = '/collections/all')
-                                                    : undefined
-                                            }
-                                        />
-                                    )}
-                                </div>
-                            );
-                        });
-                    }}
-                </Await>
-            </Suspense>
-        </div>
-    );
-};
-
-
-// const FramedProductsCanvas = ({products}: {products: Promise<any>}) => {
+//
+// const FramedProductsCanvas = ({ products }: { products: Promise<any> }) => {
 //   const layout = [
-//     {frameId: 'frame1', productIndex: 0, column: 1}, // Product frame
-//     // {frameId: 'frame2', productIndex: 1, column: 2}, // Product frame
-//     // {frameId: 'frame3', productIndex: undefined, column: 3}, // Empty frame
-//     // {frameId: 'frame1', productIndex: 2, column: 4}, // Product frame
-//     // {frameId: 'frame2', productIndex: undefined, column: 1}, // Empty frame
-//     // Add more layout configurations as needed
+//     { frameId: "frame1", gridColumn: "3 / 4", gridRow: "2 / 3" },
+//     { frameId: "frame8", gridColumn: "2 / 3", gridRow: "1 / 2" },
+//     { frameId: "frame3", gridColumn: "1 / 3", gridRow: "2 / 3" },
+//     { frameId: "frame5", gridColumn: "3 / 4", gridRow: "1 / 3" },
 //   ];
 //
-//   // Group frames by columns
-//   const groupedByColumns = layout.reduce((acc, item) => {
-//     acc[item.column] = acc[item.column] || [];
-//     acc[item.column].push(item);
-//     return acc;
-//   }, {} as Record<number, typeof layout>);
-//
 //   return (
-//     <div
-//       style={{
-//         display: 'grid',
-//         gridTemplateColumns: 'repeat(5, 1fr)',
-//         padding: '16px',
-//         width: '100vw',
-//       }}
-//     >
-//       <Suspense fallback={<div>Loading...</div>}>
-//         <Await resolve={products}>
-//           {(resolvedProducts) => {
-//             const productNodes = resolvedProducts?.products?.nodes || [];
-//
-//             return Object.keys(groupedByColumns).map((columnKey) => (
-//               <div
-//                 key={`column-${columnKey}`}
-//                 style={{
-//                   border: '1px solid rgba(0, 0, 0, 0.2)', // Border for each column
-//                   padding: '8px', // Optional padding inside the column
-//                 }}
-//               >
-//                 {groupedByColumns[Number(columnKey)].map((item, index) => (
-//                   <FramedProduct
-//                     key={index}
-//                     frameId={item.frameId as keyof typeof frameSrcObject}
-//                     product={
-//                       item.productIndex !== undefined
-//                         ? productNodes[item.productIndex]
-//                         : undefined
-//                     }
-//                     onClick={
-//                       item.productIndex === undefined // Empty frame
-//                         ? () => (window.location.href = '/collections/all')
-//                         : undefined
-//                     }
-//                   />
-//                 ))}
-//               </div>
-//             ));
+//       <div
+//           style={{
+//             display: "grid",
+//             gridTemplateColumns: "repeat(3, 1fr)", // 3 columns
+//             gridTemplateRows: "repeat(2, auto)", // 2 rows
+//             gap: "16px", // Space between frames
+//             width: "95%",
+//             height: "100%",
+//             border: "1px solid red",
 //           }}
-//         </Await>
-//       </Suspense>
-//     </div>
+//       >
+//         <Suspense fallback={<div>Loading...</div>}>
+//           <Await resolve={products}>
+//             {(resolvedProducts) => {
+//               const productNodes = resolvedProducts?.products?.nodes || [];
+//               let productIndex = 0;
+//
+//               return layout.map((item, idx) => {
+//                 const product =
+//                     productIndex < productNodes.length
+//                         ? productNodes[productIndex++]
+//                         : undefined;
+//
+//                 return (
+//                     <div
+//                         key={`frame-${item.frameId}`}
+//                         style={{
+//                           gridColumn: item.gridColumn,
+//                           gridRow: item.gridRow,
+//                           outline: '1px solid red',
+//                           display: "flex",
+//                           justifyContent: "center",
+//                           alignItems: "center",
+//                         }}
+//                     >
+//                       <FramedProduct
+//                           frameId={item.frameId as keyof typeof frameSrcObject}
+//                           product={product}
+//                       />
+//                     </div>
+//                 );
+//               });
+//             }}
+//           </Await>
+//         </Suspense>
+//       </div>
 //   );
 // };
+
+const FramedProductsCanvas = ({products}: {products: Promise<any>}) => {
+  const layout = [
+    {frameId: 'frame1', tileIndex: 5}, // Top-left
+    {frameId: 'frame8', tileIndex: 5},
+    {frameId: 'frame3', tileIndex: 4},
+    {frameId: 'frame5', tileIndex: 4},
+
+  ];
+
+  const tileCount = 100; // 3x3 layout
+
+  const gridSize = Math.ceil(Math.sqrt(tileCount));
+  const tileWidth = 100 / gridSize; // Percentage width
+  const tileHeight = 100 / gridSize; // Percentage height
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap', // Wrap tiles into rows
+        width: '95%', // Fixed width for the container
+        height: '100%', // Fixed height for the container
+        border: '1px solid red', // Outer border for the whole canvas
+      }}
+    >
+      <Suspense fallback={<div>Loading...</div>}>
+        <Await resolve={products}>
+          {(resolvedProducts) => {
+            const productNodes = resolvedProducts?.products?.nodes || [];
+            let productIndex = 0; // Track product order for placement
+
+            return Array.from({length: tileCount}).map((_, tileIndex) => {
+              // Find all layout items for this tile
+              const layoutItems = layout.filter(
+                (item) => item.tileIndex === tileIndex,
+              );
+
+              return (
+                <div
+                  key={`tile-${tileIndex}`}
+                  style={{
+                    width: '10%', // Each tile is 1/3 of the container's width
+                    height: '10%', // Each tile is 1/4 of the container's height
+                    boxSizing: 'border-box', // Include border in the width/height calculation
+                    border: '0.5px solid black', // Inner border for each tile
+                    display: 'flex',
+                    flexDirection: 'column', // Stack multiple items vertically
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    overflow: 'visible', // Allow content to overflow
+                  }}
+                >
+                  <span>{tileIndex + 1}</span>
+                  {/* Render all FramedProducts for this tile */}
+                  {layoutItems.map((layoutItem, idx) => {
+                    const product =
+                      layoutItem.frameId && productIndex < productNodes.length
+                        ? productNodes[productIndex++]
+                        : undefined;
+
+                    return (
+                      <FramedProduct
+                        key={`${layoutItem.frameId}-${idx}`}
+                        frameId={
+                          layoutItem.frameId as keyof typeof frameSrcObject
+                        }
+                        product={product} // Render the next product in order
+                        onClick={
+                          !product
+                            ? () => (window.location.href = '/collections/all')
+                            : undefined
+                        }
+                      />
+                    );
+                  })}
+                </div>
+              );
+            });
+          }}
+        </Await>
+      </Suspense>
+    </div>
+  );
+};
 
 export default function Homepage() {
   const data = useLoaderData<typeof loader>();
