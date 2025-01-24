@@ -123,10 +123,10 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
 
 const FramedProductsCanvas = ({products}: {products: Promise<any>}) => {
   const layout = [
-    {frameId: 'frame1', tileIndex: 5}, // Top-left
-    {frameId: 'frame8', tileIndex: 5},
-    {frameId: 'frame3', tileIndex: 4},
-    {frameId: 'frame5', tileIndex: 4},
+    {frameId: 'frame1', tileIndex: 56}, // Top-left
+    {frameId: 'frame8', tileIndex: 78},
+    {frameId: 'frame3', tileIndex: 43},
+    {frameId: 'frame5', tileIndex: 73},
 
   ];
 
