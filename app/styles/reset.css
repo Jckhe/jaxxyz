@@ -94,7 +94,7 @@ body {
 
 
 body > main {
-  height: 120dvh;
+  height: 1100px;
   display: flex;
   flex-direction: column;
   justify-content: center;
