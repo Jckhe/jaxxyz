@@ -117,11 +117,10 @@ function HeaderCtas({
       <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
         <Suspense fallback="Sign in">
           <Await resolve={isLoggedIn} errorElement="Sign in">
-            {(isLoggedIn) => (isLoggedIn ? 'ACCOUNT' : 'SIGN IN')}
+            ACCOUNT
           </Await>
         </Suspense>
       </NavLink>
-
       <CartToggle cart={cart} />
     </nav>
   );

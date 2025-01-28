@@ -7,6 +7,7 @@ import type {
 import {AddToCartButton} from './AddToCartButton';
 import {useAside} from './Aside';
 import type {ProductFragment} from 'storefrontapi.generated';
+import type {CSSProperties} from 'react';
 
 export function ProductForm({
   productOptions,
@@ -17,16 +18,26 @@ export function ProductForm({
 }) {
   const navigate = useNavigate();
   const {open} = useAside();
+  const sortedProductOptions = [...productOptions].sort((a, b) => {
+    // If a is "Size" but b is not, push a to the end
+    if (a.name === 'Size' && b.name !== 'Size') return 1;
+    // If b is "Size" but a is not, push b to the end
+    if (b.name === 'Size' && a.name !== 'Size') return -1;
+    // Otherwise no change in ordering
+    return 0;
+  });
   return (
     <div className="product-form">
-      {productOptions.map((option) => {
+      {sortedProductOptions.map((option) => {
         // If there is only a single value in the option values, don't display the option
         if (option.optionValues.length === 1) return null;
-
+        const sizeOption: boolean = option.name === 'Size';
         return (
           <div className="product-options" key={option.name}>
             <h5>{option.name}</h5>
-            <div className="product-options-grid">
+            <div
+              className={`product-options-grid${sizeOption ? '-sizes' : ''}`}
+            >
               {option.optionValues.map((value) => {
                 const {
                   name,
@@ -38,6 +49,8 @@ export function ProductForm({
                   isDifferentProduct,
                   swatch,
                 } = value;
+
+                const conditionalStyles: CSSProperties = {};
 
                 if (isDifferentProduct) {
                   // SEO
@@ -62,6 +75,32 @@ export function ProductForm({
                       <ProductOptionSwatch swatch={swatch} name={name} />
                     </Link>
                   );
+                } else if (sizeOption) {
+                  return (
+                    <button
+                      type="button"
+                      className={`product-options-item-size${
+                        exists && !selected ? ' link' : ''
+                      }`}
+                      key={option.name + name}
+                      style={{
+                        border: selected ? '1px solid black' : '1px solid rgba(236, 236, 236, 1)',
+                        opacity: available ? 1 : 0.3,
+                        ...conditionalStyles,
+                      }}
+                      disabled={!exists}
+                      onClick={() => {
+                        if (!selected) {
+                          navigate(`?${variantUriQuery}`, {
+                            replace: true,
+                            preventScrollReset: true,
+                          });
+                        }
+                      }}
+                    >
+                      <ProductOptionSwatch swatch={swatch} name={name} />
+                    </button>
+                  );
                 } else {
                   // SEO
                   // When the variant is an update to the search param,
@@ -80,6 +119,7 @@ export function ProductForm({
                           ? '1px solid black'
                           : '1px solid transparent',
                         opacity: available ? 1 : 0.3,
+                        ...conditionalStyles,
                       }}
                       disabled={!exists}
                       onClick={() => {
@@ -118,7 +158,7 @@ export function ProductForm({
             : []
         }
       >
-        {selectedVariant?.availableForSale ? 'Add to cart' : 'Sold out'}
+        {selectedVariant?.availableForSale ? 'ADD TO CART' : 'SOLD OUT'}
       </AddToCartButton>
     </div>
   );

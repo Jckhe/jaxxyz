@@ -52,7 +52,6 @@ export default function Collection() {
 
   return (
     <div className="collection">
-      <h1>Products</h1>
       <PaginatedResourceSection
         connection={products}
         resourcesClassName="products-grid"
@@ -93,9 +92,9 @@ function ProductItem({
           sizes="(min-width: 45em) 400px, 100vw"
         />
       )}
-      <h4>{product.title}</h4>
+      <h5>{product.title.toUpperCase()}</h5>
       <small>
-        <Money data={product.priceRange.minVariantPrice} />
+        <Money data={product.priceRange.minVariantPrice} withoutTrailingZeros={true} />
       </small>
     </Link>
   );

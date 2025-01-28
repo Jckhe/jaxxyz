@@ -26,6 +26,7 @@ export function AddToCartButton({
           <button
             type="submit"
             onClick={onClick}
+            className="atc-button"
             disabled={disabled ?? fetcher.state !== 'idle'}
           >
             {children}
