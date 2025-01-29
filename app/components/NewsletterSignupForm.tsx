@@ -100,12 +100,16 @@ export default function NewsletterSignupForm(): ReactElement {
     setEmailAddress(event.target.value);
   };
 
+  const embedCode = `
+<script
+  type="text/javascript"
+  src="//static.klaviyo.com/onsite/js/klaviyo.js?company_id=Xb2Wdw">
+</script>
+<div class="klaviyo-form-V7rMuK"></div>
+`;
+
   return (
-    <div className="newsletter-signup-form-container">
-      {/*<Theme hasBackground={false}>*/}
-      {/*  <EmailAddressForm onChange={handleEmailChange} value={emailAddress} />*/}
-      {/*  <PhoneNumberForm value={phoneNumber} onChange={handlePhoneInput} />*/}
-      {/*</Theme>*/}
-    </div>
+      <div className="klaviyo-form-V7rMuK"></div>
+
   );
 }

@@ -11,12 +11,32 @@ export default async function handleRequest(
   remixContext: EntryContext,
   context: AppLoadContext,
 ) {
-  const {nonce, header, NonceProvider} = createContentSecurityPolicy({
+  const requestUrl = new URL(request.url); // Get the full request URL
+  const currentDomain = requestUrl.origin;
+  const csp = createContentSecurityPolicy({
+    connectSrc: ["'self'", '*.klaviyo.com'],
+    scriptSrc: ["'self'", '*.klaviyo.com', '*.shopify.com', ''], // No nonce yet
+    styleSrc: ["'self'", '*.klaviyo.com'],
     shop: {
       checkoutDomain: context.env.PUBLIC_CHECKOUT_DOMAIN,
       storeDomain: context.env.PUBLIC_STORE_DOMAIN,
     },
   });
+
+  // eslint-disable-next-line prefer-const
+  let {nonce, header, NonceProvider} = csp;
+
+  if (header.includes('default-src')) {
+    header = header.replace(
+      /default-src ([^;]+)/,
+      (match, existingValues) =>
+        `default-src ${existingValues} cdnjs.cloudflare.com`,
+    );
+  } else {
+    header += `; default-src 'self' cdnjs.cloudflare.com`;
+  }
+
+  console.log('header ', header);
 
   const body = await renderToReadableStream(
     <NonceProvider>
@@ -26,7 +46,6 @@ export default async function handleRequest(
       nonce,
       signal: request.signal,
       onError(error) {
-        // eslint-disable-next-line no-console
         console.error(error);
         responseStatusCode = 500;
       },

@@ -18,7 +18,7 @@ import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
-
+import {useEffect} from 'react';
 
 export type RootLoader = typeof loader;
 
@@ -135,6 +135,23 @@ function loadDeferredData({context}: LoaderFunctionArgs) {
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
   const data = useRouteLoaderData<RootLoader>('root');
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src =
+      'https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=Xb2Wdw';
+    script.type = 'text/javascript';
+    if (typeof nonce === 'string') {
+      script.setAttribute('nonce', nonce);
+    }
+    script.defer = true;
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup if needed
+      document.body.removeChild(script);
+    };
+  }, [nonce]);
 
   return (
     <html lang="en">

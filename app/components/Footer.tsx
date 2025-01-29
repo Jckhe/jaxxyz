@@ -44,8 +44,8 @@ function FooterMenu({
   publicStoreDomain: string;
 }) {
   const socialLinks = [
-    {type: 'INSTAGRAM', url: '#'},
-    {type: 'YOUTUBE', url: '#'},
+    {type: 'INSTAGRAM', url: 'https://instagram.com/jaxxyz.co/'},
+    {type: 'YOUTUBE', url: 'https://www.youtube.com/watch?v=QrR_gm6RqCo'},
     {type: 'SPOTIFY', url: '#'},
   ];
   return (
@@ -60,13 +60,27 @@ function FooterMenu({
           </p>
         </div>
         <div className="footer-menu-social-container">
-          {socialLinks.map(
-            (link): ReactElement => (
-              <NavLink to={link.url} key={link.type}>
-                {link.type}
+          {socialLinks.map(({type, url}): ReactElement => {
+            const isDisabled = url === '#';
+            return (
+              <NavLink
+                to={url}
+                key={type}
+                onClick={(e) => {
+                  if (isDisabled) e.preventDefault();
+                }}
+                style={{
+                  pointerEvents: isDisabled ? 'none' : 'auto',
+                  color: isDisabled ? 'gray' : 'inherit',
+                  cursor: isDisabled ? 'default' : 'pointer',
+                  textDecoration: isDisabled ? 'line-through' : 'none',
+                }}
+                aria-disabled={isDisabled}
+              >
+                {type}
               </NavLink>
-            ),
-          )}
+            );
+          })}
         </div>
       </div>
       <div className="right-footer-container">

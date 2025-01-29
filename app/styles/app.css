@@ -557,6 +557,8 @@ button.reset:hover:not(:has(> *)) {
   margin-bottom: 2rem;
 }
 
+
+
 .product-item img {
   height: auto;
   width: 100%;
@@ -565,6 +567,27 @@ button.reset:hover:not(:has(> *)) {
 .product-item h5 {
   margin: 0.15rem 0;
 }
+
+
+.product-item {
+  text-decoration: none!important;
+}
+
+.product-item:hover {
+  /* Do NOT apply opacity here; otherwise everything, including the image, fades */
+}
+
+/* Fade just the text */
+.product-item:hover h5,
+.product-item:hover small {
+  opacity: 0.5;
+}
+
+/* Keep the image at full opacity */
+.product-item:hover img {
+  opacity: 1;
+}
+
 
 /*
 * --------------------------------------------------
