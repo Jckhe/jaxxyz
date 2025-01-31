@@ -621,6 +621,15 @@ button.reset:hover:not(:has(> *)) {
 
 }
 
+.klaviyo-form .go300628013 {
+  display: none !important;
+}
+
+.newsletter-form-wrapper {
+  display: flex;
+  width: 35%;
+}
+
 .product-price-on-sale {
   display: flex;
   grid-gap: 0.5rem;

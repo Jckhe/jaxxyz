@@ -137,18 +137,58 @@ export function Layout({children}: {children?: React.ReactNode}) {
   const data = useRouteLoaderData<RootLoader>('root');
 
   useEffect(() => {
+    // Load Klaviyo script
     const script = document.createElement('script');
     script.src =
       'https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=Xb2Wdw';
     script.type = 'text/javascript';
+    script.defer = true;
     if (typeof nonce === 'string') {
       script.setAttribute('nonce', nonce);
     }
-    script.defer = true;
     document.body.appendChild(script);
 
+    // Wait for the script to load and initialize Klaviyo forms
+    // script.onload = () => {
+    //   if (window.KlaviyoSubscribe) {
+    //     console.log('Klaviyo loaded');
+    //   }
+    // };
+
+    // Hide the default Klaviyo submit button
+    // const hideDefaultSubmit = () => {
+    //   document
+    //     .querySelectorAll(".klaviyo-form button[type='button']")
+    //     .forEach((btn) => {
+    //       (btn as HTMLElement).style.display = 'none';
+    //     });
+    // };
+
+    // Add Enter key event listener for submission
+    // const handleKeyDown = (event: KeyboardEvent) => {
+    //   if (event.key === 'Enter') {
+    //     event.preventDefault();
+    //     const form = document.querySelector(
+    //       '.klaviyo-form form',
+    //     ) as HTMLFormElement;
+    //     const emailInput = document.querySelector(
+    //       ".klaviyo-form input[type='email']",
+    //     ) as HTMLInputElement;
+    //     const phoneInput = document.querySelector(
+    //       ".klaviyo-form input[type='tel']",
+    //     ) as HTMLInputElement;
+    //
+    //     if (emailInput?.value || phoneInput?.value) {
+    //       form?.submit();
+    //     }
+    //   }
+    // };
+
+    // document.addEventListener('keydown', handleKeyDown);
+    // setTimeout(hideDefaultSubmit, 2000); // Give time for Klaviyo to render
+
     return () => {
-      // Cleanup if needed
+      // document.removeEventListener('keydown', handleKeyDown);
       document.body.removeChild(script);
     };
   }, [nonce]);

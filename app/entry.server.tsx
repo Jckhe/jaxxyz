@@ -11,8 +11,6 @@ export default async function handleRequest(
   remixContext: EntryContext,
   context: AppLoadContext,
 ) {
-  const requestUrl = new URL(request.url); // Get the full request URL
-  const currentDomain = requestUrl.origin;
   const csp = createContentSecurityPolicy({
     connectSrc: ["'self'", '*.klaviyo.com'],
     scriptSrc: ["'self'", '*.klaviyo.com', '*.shopify.com', ''], // No nonce yet
@@ -35,8 +33,6 @@ export default async function handleRequest(
   } else {
     header += `; default-src 'self' cdnjs.cloudflare.com`;
   }
-
-  console.log('header ', header);
 
   const body = await renderToReadableStream(
     <NonceProvider>

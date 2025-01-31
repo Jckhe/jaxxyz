@@ -1,5 +1,6 @@
 import type {IGraphQLConfig} from 'graphql-config';
-import {getSchema} from '@shopify/hydrogen-codegen';
+import {Api, getSchema} from '@shopify/hydrogen-codegen';
+import {ApiType, shopifyApiProject} from "@shopify/api-codegen-preset";
 
 /**
  * GraphQL Config
