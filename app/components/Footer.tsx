@@ -73,7 +73,6 @@ function FooterMenu({
                   pointerEvents: isDisabled ? 'none' : 'auto',
                   color: isDisabled ? 'gray' : 'inherit',
                   cursor: isDisabled ? 'default' : 'pointer',
-                  textDecoration: isDisabled ? 'line-through' : 'none',
                 }}
                 aria-disabled={isDisabled}
               >

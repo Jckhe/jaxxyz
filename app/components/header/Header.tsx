@@ -33,7 +33,7 @@ export function Header({
   if (isPasswordPage) {
     return (
       <header className="header header-password">
-        <NavLink prefetch="intent" to="/" className="header-logo-container">
+        <NavLink to="/password" className="header-logo-container">
           <span id="header-logo-text">jaxxYz</span>
         </NavLink>
       </header>
@@ -121,7 +121,6 @@ function HeaderCtas({
   return (
     <nav className="header-ctas" role="navigation">
       <HeaderMenuMobileToggle />
-      <SearchToggle />
       <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>
         <Suspense fallback="Sign in">
           <Await resolve={isLoggedIn} errorElement="Sign in">
