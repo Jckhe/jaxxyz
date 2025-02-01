@@ -19,6 +19,8 @@ import carouselEight from '../assets/carousel/carousel-8.png';
 import carouselNine from '../assets/carousel/carousel-9.png';
 import carouselTen from '../assets/carousel/carousel-10.png';
 
+
+
 export default function Password() {
   const navigate = useNavigate();
   const carouselPhotos = [

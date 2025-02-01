@@ -1,7 +1,6 @@
 import '@radix-ui/themes/styles.css';
-import {Theme} from '@radix-ui/themes';
 import {useNonce, getShopAnalytics, Analytics} from '@shopify/hydrogen';
-import {defer, type LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import {defer, type LoaderFunctionArgs, redirect} from '@shopify/remix-oxygen';
 import {
   Links,
   Meta,
@@ -12,7 +11,9 @@ import {
   ScrollRestoration,
   isRouteErrorResponse,
   type ShouldRevalidateFunction,
+  Form,
 } from '@remix-run/react';
+
 import favicon from '~/assets/favicon.svg';
 import resetStyles from '~/styles/reset.css?url';
 import appStyles from '~/styles/app.css?url';
@@ -20,54 +21,120 @@ import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import {useEffect} from 'react';
 
-export type RootLoader = typeof loader;
+/* ---------------------------------------------
+   1) STORE LOCK QUERY - Single item approach
+   --------------------------------------------- */
+const IS_DEV = process.env.NODE_ENV === 'development';
 
-/**
- * This is important to avoid re-fetching root queries on sub-navigations
- */
+// Decide which type/handle you want to query
+const METAOBJECT_TYPE = IS_DEV
+  ? 'password_page_toggle_dev'
+  : 'password_page_toggle';
+const METAOBJECT_HANDLE = IS_DEV ? 'password_page_dev' : 'password_page';
+
+const STORE_LOCK_QUERY = `#graphql
+  query getStoreLockSettings($metaobjectHandle: MetaobjectHandleInput!) {
+    metaobject(handle: $metaobjectHandle) {
+      handle
+      type
+      fields {
+        key
+        value
+      }
+    }
+  }
+`;
+
+export function links() {
+  return [
+    {rel: 'stylesheet', href: resetStyles},
+    {rel: 'stylesheet', href: appStyles},
+    {rel: 'preconnect', href: 'https://cdn.shopify.com'},
+    {rel: 'preconnect', href: 'https://shop.app'},
+    {rel: 'icon', type: 'image/svg+xml', href: favicon},
+  ];
+}
+
 export const shouldRevalidate: ShouldRevalidateFunction = ({
   formMethod,
   currentUrl,
   nextUrl,
   defaultShouldRevalidate,
 }) => {
-  // revalidate when a mutation is performed e.g add to cart, login...
+  // revalidate on non-GET form submissions
   if (formMethod && formMethod !== 'GET') return true;
-
-  // revalidate when manually revalidating via useRevalidator
+  // revalidate on forced revalidation
   if (currentUrl.toString() === nextUrl.toString()) return true;
-
   return defaultShouldRevalidate;
 };
 
-export function links() {
-  return [
-    {rel: 'stylesheet', href: resetStyles},
-    {rel: 'stylesheet', href: appStyles},
-    {
-      rel: 'preconnect',
-      href: 'https://cdn.shopify.com',
-    },
-    {
-      rel: 'preconnect',
-      href: 'https://shop.app',
-    },
-    {rel: 'icon', type: 'image/svg+xml', href: favicon},
-  ];
-}
-
+/* ---------------------------------------------
+   2) ROOT LOADER
+   --------------------------------------------- */
 export async function loader(args: LoaderFunctionArgs) {
-  // Start fetching non-critical data without blocking time to first byte
+  const {request, context} = args;
+  const {storefront, env} = context;
+
+  const metaobjectHandle = {
+    handle: METAOBJECT_HANDLE,
+    type: METAOBJECT_TYPE,
+  };
+  console.log(`is dev: ${IS_DEV} `);
+  console.log(metaobjectHandle);
+
+  // Fetch the metaobject
+  const data = await storefront.query<{
+    metaobject: {
+      handle: string;
+      type: string;
+      fields: Array<{key: string; value: string}>;
+    } | null;
+  }>(STORE_LOCK_QUERY, {
+    variables: {
+      metaobjectHandle,
+    },
+  });
+
+
+  // Default values
+  let locked = false;
+  let storedPassword = '';
+
+  const metaobject = data?.metaobject;
+  if (metaobject?.fields) {
+    for (const {key, value} of metaobject.fields) {
+      // IMPORTANT: match your field keys
+      if (key === 'toggle') {
+        locked = value === 'true';
+      }
+      if (key === 'password') {
+        storedPassword = value;
+      }
+    }
+  }
+
+  // If locked, check cookie
+  if (locked) {
+    const {pathname} = new URL(request.url);
+    const cookieHeader = request.headers.get('Cookie') || '';
+    const userUnlocked = cookieHeader.includes('unlocked=true');
+
+    // If not unlocked AND we’re not already at "/password", redirect there
+    if (!userUnlocked && pathname !== '/password') {
+      return redirect('/password');
+    }
+  }
+
+  // C) Load your store’s other data (header, etc.)
   const deferredData = loadDeferredData(args);
-
-  // Await the critical data required to render initial state of the page
   const criticalData = await loadCriticalData(args);
-
-  const {storefront, env} = args.context;
 
   return defer({
     ...deferredData,
     ...criticalData,
+    // Additional data you might pass to client
+    locked,
+    storedPassword,
     publicStoreDomain: env.PUBLIC_STORE_DOMAIN,
     shop: getShopAnalytics({
       storefront,
@@ -77,67 +144,59 @@ export async function loader(args: LoaderFunctionArgs) {
       checkoutDomain: env.PUBLIC_CHECKOUT_DOMAIN,
       storefrontAccessToken: env.PUBLIC_STOREFRONT_API_TOKEN,
       withPrivacyBanner: false,
-      // localize the privacy banner
-      country: args.context.storefront.i18n.country,
-      language: args.context.storefront.i18n.language,
+      country: context.storefront.i18n.country,
+      language: context.storefront.i18n.language,
     },
   });
 }
 
 /**
- * Load data necessary for rendering content above the fold. This is the critical data
- * needed to render the page. If it's unavailable, the whole page should 400 or 500 error.
+ * Fetch data necessary for rendering content above the fold.
  */
 async function loadCriticalData({context}: LoaderFunctionArgs) {
   const {storefront} = context;
-
   const [header] = await Promise.all([
     storefront.query(HEADER_QUERY, {
       cache: storefront.CacheLong(),
-      variables: {
-        headerMenuHandle: 'main-menu', // Adjust to your header menu handle
-      },
+      variables: {headerMenuHandle: 'main-menu'},
     }),
-    // Add other queries here, so that they are loaded in parallel
+    // Add additional critical queries here...
   ]);
-
   return {header};
 }
 
 /**
- * Load data for rendering content below the fold. This data is deferred and will be
- * fetched after the initial page load. If it's unavailable, the page should still 200.
- * Make sure to not throw any errors here, as it will cause the page to 500.
+ * Defer data needed below the fold, e.g. footer or cart details.
  */
 function loadDeferredData({context}: LoaderFunctionArgs) {
   const {storefront, customerAccount, cart} = context;
 
-  // defer the footer query (below the fold)
   const footer = storefront
     .query(FOOTER_QUERY, {
       cache: storefront.CacheLong(),
-      variables: {
-        footerMenuHandle: 'footer', // Adjust to your footer menu handle
-      },
+      variables: {footerMenuHandle: 'footer'},
     })
     .catch((error) => {
-      // Log query errors, but don't throw them so the page can still render
       console.error(error);
       return null;
     });
+
   return {
+    footer,
     cart: cart.get(),
     isLoggedIn: customerAccount.isLoggedIn(),
-    footer,
   };
 }
 
+/* ---------------------------------------------
+   3) ROOT LAYOUT
+   --------------------------------------------- */
 export function Layout({children}: {children?: React.ReactNode}) {
   const nonce = useNonce();
-  const data = useRouteLoaderData<RootLoader>('root');
+  const data = useRouteLoaderData<typeof loader>('root');
 
+  // Example: Load Klaviyo script
   useEffect(() => {
-    // Load Klaviyo script
     const script = document.createElement('script');
     script.src =
       'https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=Xb2Wdw';
@@ -148,47 +207,7 @@ export function Layout({children}: {children?: React.ReactNode}) {
     }
     document.body.appendChild(script);
 
-    // Wait for the script to load and initialize Klaviyo forms
-    // script.onload = () => {
-    //   if (window.KlaviyoSubscribe) {
-    //     console.log('Klaviyo loaded');
-    //   }
-    // };
-
-    // Hide the default Klaviyo submit button
-    // const hideDefaultSubmit = () => {
-    //   document
-    //     .querySelectorAll(".klaviyo-form button[type='button']")
-    //     .forEach((btn) => {
-    //       (btn as HTMLElement).style.display = 'none';
-    //     });
-    // };
-
-    // Add Enter key event listener for submission
-    // const handleKeyDown = (event: KeyboardEvent) => {
-    //   if (event.key === 'Enter') {
-    //     event.preventDefault();
-    //     const form = document.querySelector(
-    //       '.klaviyo-form form',
-    //     ) as HTMLFormElement;
-    //     const emailInput = document.querySelector(
-    //       ".klaviyo-form input[type='email']",
-    //     ) as HTMLInputElement;
-    //     const phoneInput = document.querySelector(
-    //       ".klaviyo-form input[type='tel']",
-    //     ) as HTMLInputElement;
-    //
-    //     if (emailInput?.value || phoneInput?.value) {
-    //       form?.submit();
-    //     }
-    //   }
-    // };
-
-    // document.addEventListener('keydown', handleKeyDown);
-    // setTimeout(hideDefaultSubmit, 2000); // Give time for Klaviyo to render
-
     return () => {
-      // document.removeEventListener('keydown', handleKeyDown);
       document.body.removeChild(script);
     };
   }, [nonce]);
@@ -224,13 +243,16 @@ export default function App() {
   return <Outlet />;
 }
 
+/* ---------------------------------------------
+   4) ERROR BOUNDARY
+   --------------------------------------------- */
 export function ErrorBoundary() {
   const error = useRouteError();
   let errorMessage = 'Unknown error';
   let errorStatus = 500;
 
   if (isRouteErrorResponse(error)) {
-    errorMessage = error?.data?.message ?? error.data;
+    errorMessage = error.data?.message ?? error.data;
     errorStatus = error.status;
   } else if (error instanceof Error) {
     errorMessage = error.message;
