@@ -5,7 +5,10 @@ import {
   useAnalytics,
   useOptimisticCart,
 } from '@shopify/hydrogen';
-import type {HeaderQuery, CartApiQueryFragment} from '../../../storefrontapi.generated';
+import type {
+  HeaderQuery,
+  CartApiQueryFragment,
+} from '../../../storefrontapi.generated';
 import {useAside} from '~/components/Aside';
 
 interface HeaderProps {
@@ -13,6 +16,7 @@ interface HeaderProps {
   cart: Promise<CartApiQueryFragment | null>;
   isLoggedIn: Promise<boolean>;
   publicStoreDomain: string;
+  isPasswordPage: boolean;
 }
 
 type Viewport = 'desktop' | 'mobile';
@@ -22,8 +26,19 @@ export function Header({
   isLoggedIn,
   cart,
   publicStoreDomain,
+  isPasswordPage = false,
 }: HeaderProps) {
   const {shop, menu} = header;
+
+  if (isPasswordPage) {
+    return (
+      <header className="header header-password">
+        <NavLink prefetch="intent" to="/" className="header-logo-container">
+          <span id="header-logo-text">jaxxYz</span>
+        </NavLink>
+      </header>
+    );
+  }
   return (
     <header className="header">
       <HeaderMenu
@@ -32,11 +47,7 @@ export function Header({
         primaryDomainUrl={header.shop.primaryDomain.url}
         publicStoreDomain={publicStoreDomain}
       />
-      <NavLink
-        prefetch="intent"
-        to="/"
-        className="header-logo-container"
-      >
+      <NavLink prefetch="intent" to="/" className="header-logo-container">
         <span id="header-logo-text">jaxxYz</span>
       </NavLink>
       <HeaderCtas isLoggedIn={isLoggedIn} cart={cart} />
@@ -108,10 +119,7 @@ function HeaderCtas({
   cart,
 }: Pick<HeaderProps, 'isLoggedIn' | 'cart'>) {
   return (
-    <nav
-      className="header-ctas"
-      role="navigation"
-    >
+    <nav className="header-ctas" role="navigation">
       <HeaderMenuMobileToggle />
       <SearchToggle />
       <NavLink prefetch="intent" to="/account" style={activeLinkStyle}>

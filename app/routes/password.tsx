@@ -48,14 +48,13 @@ export default function Password() {
   return (
     <div
       style={{
-        border: '1px solid red',
         width: '100%',
-        height: '100%',
+        height: '100dvh',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'space-around',
-        padding: '15% 0',
+        justifyContent: 'start',
+        padding: '0% 0',
       }}
     >
       <div
@@ -64,14 +63,26 @@ export default function Password() {
           border: '1px solid purple',
           width: '100%',
           height: '45dvh',
+            marginTop: '3.5%',
+            marginBottom: '4.5%'
         }}
       >
         <Carousel images={carouselPhotos} />
       </div>
       <div
         className="newsletter-form-wrapper password"
-        style={{border: '1px solid red', width: 'fit-content'}}
+        style={{width: '40%', maxWidth: '500px', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}
       >
+        <p>
+          WEBSITE CLOSED
+          <br />
+          BUT STAY A WHILE
+          <br />
+          <br />
+          SUBSCRIBE FOR EXCLUSIVE OFFERS, MEMBER EVENTS
+          <br />
+          AND DROP ANNOUNCEMENTS
+        </p>
         <NewsletterSignupForm />
       </div>
     </div>

@@ -1,4 +1,4 @@
-import {Await, Link} from '@remix-run/react';
+import {Await, Link, useLocation} from '@remix-run/react';
 import {Suspense, useId} from 'react';
 import type {
   CartApiQueryFragment,
@@ -34,6 +34,26 @@ export function PageLayout({
   isLoggedIn,
   publicStoreDomain,
 }: PageLayoutProps) {
+  const location = useLocation();
+  const isPasswordPage = location.pathname === '/password';
+
+  if (isPasswordPage) {
+    return (
+        <Aside.Provider>
+            {header && (
+                <Header
+            header={header}
+                    cart={cart}
+                    isLoggedIn={isLoggedIn}
+                    publicStoreDomain={publicStoreDomain}
+            isPasswordPage={isPasswordPage}
+                />
+            )}
+            <main id="password">{children}</main>
+        </Aside.Provider>
+    )
+  }
+
   return (
     <Aside.Provider>
       <CartAside cart={cart} />
@@ -45,6 +65,7 @@ export function PageLayout({
           cart={cart}
           isLoggedIn={isLoggedIn}
           publicStoreDomain={publicStoreDomain}
+          isPasswordPage={false}
         />
       )}
       <main>{children}</main>
