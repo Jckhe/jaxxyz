@@ -26,6 +26,7 @@ export default defineConfig({
   ssr: {
     optimizeDeps: {
       include: [
+        'cookie',
         'classnames',
         'react-is',
         'hoist-non-react-statics',

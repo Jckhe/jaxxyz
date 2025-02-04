@@ -203,7 +203,6 @@ main#password {
   flex-direction: column;
   justify-content: start;
   height: 100dvh;
-  border: 1px solid blue;
 }
 
 .header-logo-container {
@@ -783,7 +782,6 @@ form.klaviyo-form {
   flex-direction: column;
   justify-content: center;
   align-self: center;
-  border: 1px solid blue;
   overflow: hidden;
   padding: 0;
   height: 50px;
@@ -807,6 +805,35 @@ form.klaviyo-form {
 
 .store-password-input-form input:focus {
   outline: none;
+}
+
+.store-password-input-form input.error {
+  border: 2px solid red; /* Outlines the input in red on error */
+}
+
+/* A transition for a smooth border change */
+.store-password-input-form input {
+  transition: border 0.2s ease-in-out;
+}
+
+/* Optionally, ensure that even when focused, the error input remains red */
+.store-password-input-form input.error:focus {
+  border: 2px solid red;
+}
+
+.swiper-carousel-wrapper p {
+  font-family: "Times New Roman", Times, serif;
+}
+
+.error {
+  border: 1px solid red;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  position: absolute;
 }
 
 /*.feather-icon {*/

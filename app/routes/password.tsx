@@ -1,9 +1,8 @@
-import {Form, useNavigate, useLoaderData} from '@remix-run/react';
+import {Form, useNavigate, useLoaderData, redirect, useActionData} from '@remix-run/react';
+import type {ActionFunction} from '@remix-run/node';
 import {useEffect, useMemo, useState} from 'react';
 import {Swiper, SwiperSlide} from 'swiper/react';
 import {Autoplay} from 'swiper/modules';
-import FrameOne from '../assets/frames/frame1.png';
-import FrameTwo from '../assets/frames/frame2.png';
 import NewsletterSignupForm from '~/components/NewsletterSignupForm';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -19,6 +18,48 @@ import carouselEight from '../assets/carousel/carousel-8.png';
 import carouselNine from '../assets/carousel/carousel-9.png';
 import carouselTen from '../assets/carousel/carousel-10.png';
 import {ArrowRight} from 'react-feather';
+import {parse, serialize} from 'cookie';
+import {json, LoaderFunctionArgs} from '@shopify/remix-oxygen';
+import {defer} from '@shopify/remix-oxygen';
+import {getStoreLockSettings} from '~/lib/storeLock';
+
+export async function loader(args: LoaderFunctionArgs) {
+  const {request, context} = args;
+  const {storefront, env} = context;
+
+  const {locked, storedPassword} = await getStoreLockSettings(storefront);
+
+  if (!locked) return redirect('/');
+
+  return defer({locked, storedPassword});
+}
+
+export const action: ActionFunction = async ({request, context}) => {
+  const formData = await request.formData();
+  const inputPassword = formData.get('password');
+
+  const {storedPassword} = await getStoreLockSettings(context.storefront);
+  console.log(`storedPassword: ${JSON.stringify(storedPassword)}`);
+  console.log(`InputPassword: ${inputPassword}`);
+  const isCorrect = inputPassword === storedPassword;
+  console.log(`isCorrect: ${isCorrect}`);
+  if (isCorrect) {
+    // Set a cookie so user is "unlocked" next time
+    return redirect('/', {
+      headers: {
+        'Set-Cookie': serialize('unlocked', 'true', {
+          path: '/', // cookie valid across entire domain
+          httpOnly: true, // not accessible from JS
+          sameSite: 'lax', // typical security setting
+          // maxAge: 3600, // optionally keep them unlocked for an hour
+          // secure: true, // use true in production with HTTPS
+        }),
+      },
+    });
+  } else {
+    return json({ error: 'Invalid password' }, { status: 400 });
+  }
+};
 
 export default function Password() {
   const [open, setOpen] = useState(false);
@@ -38,17 +79,7 @@ export default function Password() {
       carouselTen,
     ];
   }, []);
-  // const [password, setPassword] = useState('');
-  //
-  // const handleSubmit = async (event: React.FormEvent) => {
-  //   event.preventDefault();
-  //   if (password === 'your-secret-password') {
-  //     localStorage.setItem('password-unlocked', 'true');
-  //     navigate('/');
-  //   } else {
-  //     alert('Incorrect password.');
-  //   }
-  // };
+
 
   return (
     <div
@@ -66,14 +97,20 @@ export default function Password() {
       <div
         className="swiper-carousel-wrapper"
         style={{
-          border: '1px solid purple',
           width: '100%',
           height: '35dvh',
           marginTop: '0.5%',
-          marginBottom: '2.5%',
+          marginBottom: '7.5%',
+          position: 'relative'
         }}
       >
         <Carousel images={carouselPhotos} />
+        <p style={{marginLeft: '65%', marginTop: '1%'}}>
+          IF NOT NOW
+          <br /> THEN WHEN
+          <br />
+          ©2025
+        </p>
       </div>
       <div className="password-newsletter-container">
         <div style={{display: `${open ? 'none' : 'block'}`}}>
@@ -89,12 +126,6 @@ export default function Password() {
           </p>
           <NewsletterSignupForm />
         </div>
-        {/*<form*/}
-        {/*  className="store-password-input-form"*/}
-        {/*  style={{display: `${open ? 'block' : 'none'}`}}*/}
-        {/*>*/}
-        {/*  <input type="password" placeholder="ENTER STORE PASSWORD" />*/}
-        {/*</form>*/}
         {open && <PasswordInput />}
       </div>
       <div className="store-password-toggle">
@@ -112,35 +143,60 @@ export default function Password() {
 const PasswordInput = () => {
   const [value, setValue] = useState('');
   const [focused, setFocused] = useState(false);
-
-  const showIcon = focused || value.length > 0;
-  // only show icon if focused or has text (up to you)
-
-  // If we want it grey when focused, black if typed >2 chars
   const iconColor = value.length > 2 ? 'black' : 'gray';
+  const actionData = useActionData<{ error?: string }>();
+  const [error, setError] = useState<string>('');
+
+
+
+  useEffect(() => {
+    if (actionData?.error) {
+      setError(actionData.error);
+    }
+  }, [actionData]);
+
+  const handleFocus = () => {
+    if (error) {
+      setError('');
+      setValue('');
+    }
+  };
+
+  // onChange handler is standard.
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
+  };
+
+  const inputClassName = error ? 'error' : '';
+
 
   return (
-    <form className="store-password-input-form">
+    <Form
+      method="post"
+      action="/password"
+      className="store-password-input-form"
+
+    >
       <div className="input-wrap">
         <input
+          name="password"
           type="password"
           placeholder="ENTER STORE PASSWORD"
           value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onFocus={() => setFocused(true)}
+          onChange={handleChange}
+          onFocus={handleFocus}
           onBlur={() => setFocused(false)}
+          className={inputClassName}
         />
-        {showIcon && (
-          <button
-            type="submit"
-            className="icon-submit-btn"
-            disabled={value.length < 3} /* optional: disable if < 3 chars */
-          >
-            <ArrowRight color={iconColor} />
-          </button>
-        )}{' '}
+        <button
+          type="submit"
+          className="icon-submit-btn"
+          disabled={value.length < 3} /* optional: disable if < 3 chars */
+        >
+          <ArrowRight color={iconColor} />
+        </button>
       </div>
-    </form>
+    </Form>
   );
 };
 
@@ -165,7 +221,7 @@ const Carousel = ({images}) => {
         return (
           <SwiperSlide
             key={`image-${index}}`}
-            style={{width: '300px', height: '100%', border: '1px solid red'}}
+            style={{width: '300px', height: '100%', border: '1px solid black'}}
           >
             <img
               style={{width: '100%', height: '100%'}}

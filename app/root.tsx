@@ -20,31 +20,7 @@ import appStyles from '~/styles/app.css?url';
 import {PageLayout} from '~/components/PageLayout';
 import {FOOTER_QUERY, HEADER_QUERY} from '~/lib/fragments';
 import {useEffect} from 'react';
-
-/* ---------------------------------------------
-   1) STORE LOCK QUERY - Single item approach
-   --------------------------------------------- */
-const IS_DEV = process.env.NODE_ENV === 'development';
-
-
-// Decide which type/handle you want to query
-const METAOBJECT_TYPE = IS_DEV
-  ? 'password_page_toggle_dev'
-  : 'password_page_toggle';
-const METAOBJECT_HANDLE = IS_DEV ? 'password_page_dev' : 'password_page';
-
-const STORE_LOCK_QUERY = `#graphql
-  query getStoreLockSettings($metaobjectHandle: MetaobjectHandleInput!) {
-    metaobject(handle: $metaobjectHandle) {
-      handle
-      type
-      fields {
-        key
-        value
-      }
-    }
-  }
-`;
+import {getStoreLockSettings} from "~/lib/storeLock";
 
 export function links() {
   return [
@@ -76,51 +52,13 @@ export async function loader(args: LoaderFunctionArgs) {
   const {request, context} = args;
   const {storefront, env} = context;
 
-  const metaobjectHandle = {
-    handle: METAOBJECT_HANDLE,
-    type: METAOBJECT_TYPE,
-  };
-  console.log(`is dev: ${IS_DEV} `);
-  console.log(metaobjectHandle);
+  const {locked, storedPassword} = await getStoreLockSettings(storefront);
 
-  // Fetch the metaobject
-  const data = await storefront.query<{
-    metaobject: {
-      handle: string;
-      type: string;
-      fields: Array<{key: string; value: string}>;
-    } | null;
-  }>(STORE_LOCK_QUERY, {
-    variables: {
-      metaobjectHandle,
-    },
-  });
-
-
-  // Default values
-  let locked = false;
-  let storedPassword = '';
-
-  const metaobject = data?.metaobject;
-  if (metaobject?.fields) {
-    for (const {key, value} of metaobject.fields) {
-      // IMPORTANT: match your field keys
-      if (key === 'toggle') {
-        locked = value === 'true';
-      }
-      if (key === 'password') {
-        storedPassword = value;
-      }
-    }
-  }
-
-  // If locked, check cookie
   if (locked) {
     const {pathname} = new URL(request.url);
     const cookieHeader = request.headers.get('Cookie') || '';
     const userUnlocked = cookieHeader.includes('unlocked=true');
 
-    // If not unlocked AND we’re not already at "/password", redirect there
     if (!userUnlocked && pathname !== '/password') {
       return redirect('/password');
     }
