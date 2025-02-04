@@ -1,5 +1,5 @@
 import {Form, useNavigate, useLoaderData} from '@remix-run/react';
-import {useEffect, useState} from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {Swiper, SwiperSlide} from 'swiper/react';
 import {Autoplay} from 'swiper/modules';
 import FrameOne from '../assets/frames/frame1.png';
@@ -18,23 +18,26 @@ import carouselSeven from '../assets/carousel/carousel-7.png';
 import carouselEight from '../assets/carousel/carousel-8.png';
 import carouselNine from '../assets/carousel/carousel-9.png';
 import carouselTen from '../assets/carousel/carousel-10.png';
-
-
+import {ArrowRight} from 'react-feather';
 
 export default function Password() {
+  const [open, setOpen] = useState(false);
+  const [focused, setFocused] = useState(false);
   const navigate = useNavigate();
-  const carouselPhotos = [
-    carouselOne,
-    carouselTwo,
-    carouselThree,
-    carouselFour,
-    carouselFive,
-    carouselSix,
-    carouselSeven,
-    carouselEight,
-    carouselNine,
-    carouselTen,
-  ];
+  const carouselPhotos = useMemo(() => {
+    return [
+      carouselOne,
+      carouselTwo,
+      carouselThree,
+      carouselFour,
+      carouselFive,
+      carouselSix,
+      carouselSeven,
+      carouselEight,
+      carouselNine,
+      carouselTen,
+    ];
+  }, []);
   // const [password, setPassword] = useState('');
   //
   // const handleSubmit = async (event: React.FormEvent) => {
@@ -51,45 +54,95 @@ export default function Password() {
     <div
       style={{
         width: '100%',
-        height: '100dvh',
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'start',
         padding: '0% 0',
       }}
+      className="password-page"
     >
       <div
         className="swiper-carousel-wrapper"
         style={{
           border: '1px solid purple',
           width: '100%',
-          height: '45dvh',
-            marginTop: '3.5%',
-            marginBottom: '4.5%'
+          height: '35dvh',
+          marginTop: '0.5%',
+          marginBottom: '2.5%',
         }}
       >
         <Carousel images={carouselPhotos} />
       </div>
-      <div
-        className="newsletter-form-wrapper password"
-        style={{width: '40%', maxWidth: '500px', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}
-      >
-        <p>
-          WEBSITE CLOSED
-          <br />
-          BUT STAY A WHILE
-          <br />
-          <br />
-          SUBSCRIBE FOR EXCLUSIVE OFFERS, MEMBER EVENTS
-          <br />
-          AND DROP ANNOUNCEMENTS
-        </p>
-        <NewsletterSignupForm />
+      <div className="password-newsletter-container">
+        <div style={{display: `${open ? 'none' : 'block'}`}}>
+          <p>
+            WEBSITE CLOSED
+            <br />
+            BUT STAY A WHILE
+            <br />
+            <br />
+            SUBSCRIBE FOR EXCLUSIVE OFFERS, MEMBER EVENTS
+            <br />
+            AND DROP ANNOUNCEMENTS
+          </p>
+          <NewsletterSignupForm />
+        </div>
+        {/*<form*/}
+        {/*  className="store-password-input-form"*/}
+        {/*  style={{display: `${open ? 'block' : 'none'}`}}*/}
+        {/*>*/}
+        {/*  <input type="password" placeholder="ENTER STORE PASSWORD" />*/}
+        {/*</form>*/}
+        {open && <PasswordInput />}
+      </div>
+      <div className="store-password-toggle">
+        <button onClick={() => setOpen(!open)}>
+          {`${(!open
+            ? 'I have a password'
+            : 'I dont have a password'
+          ).toUpperCase()}`}
+        </button>
       </div>
     </div>
   );
 }
+
+const PasswordInput = () => {
+  const [value, setValue] = useState('');
+  const [focused, setFocused] = useState(false);
+
+  const showIcon = focused || value.length > 0;
+  // only show icon if focused or has text (up to you)
+
+  // If we want it grey when focused, black if typed >2 chars
+  const iconColor = value.length > 2 ? 'black' : 'gray';
+
+  return (
+    <form className="store-password-input-form">
+      <div className="input-wrap">
+        <input
+          type="password"
+          placeholder="ENTER STORE PASSWORD"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+        />
+        {showIcon && (
+          <button
+            type="submit"
+            className="icon-submit-btn"
+            disabled={value.length < 3} /* optional: disable if < 3 chars */
+          >
+            <ArrowRight color={iconColor} />
+          </button>
+        )}{' '}
+      </div>
+    </form>
+  );
+};
 
 const Carousel = ({images}) => {
   return (
@@ -100,7 +153,7 @@ const Carousel = ({images}) => {
       spaceBetween={0} // Adjust spacing between slides
       loop={true} // Enables infinite looping
       speed={10000} // Adjusts scrolling speed (higher = slower)
-        style={{height: '100%'}}
+      style={{height: '100%'}}
       autoplay={{
         delay: 0, // No delay between transitions
         disableOnInteraction: false, // Keeps autoplay running even after user interaction
