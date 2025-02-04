@@ -51,8 +51,8 @@ export const action: ActionFunction = async ({request, context}) => {
           path: '/', // cookie valid across entire domain
           httpOnly: true, // not accessible from JS
           sameSite: 'lax', // typical security setting
-          // maxAge: 3600, // optionally keep them unlocked for an hour
-          // secure: true, // use true in production with HTTPS
+          maxAge: 3600, // optionally keep them unlocked for an hour
+          secure: true, // use true in production with HTTPS
         }),
       },
     });
@@ -209,7 +209,7 @@ const Carousel = ({images}) => {
       spaceBetween={0} // Adjust spacing between slides
       loop={true} // Enables infinite looping
       speed={10000} // Adjusts scrolling speed (higher = slower)
-      style={{height: '100%'}}
+      style={{height: '100%', border: '1px solid black'}}
       autoplay={{
         delay: 0, // No delay between transitions
         disableOnInteraction: false, // Keeps autoplay running even after user interaction
@@ -221,7 +221,7 @@ const Carousel = ({images}) => {
         return (
           <SwiperSlide
             key={`image-${index}}`}
-            style={{width: '300px', height: '100%', border: '1px solid black'}}
+            style={{width: '300px', height: '100%', border: '0px solid black'}}
           >
             <img
               style={{width: '100%', height: '100%'}}
