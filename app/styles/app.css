@@ -178,6 +178,7 @@ button.reset:hover:not(:has(> *)) {
 * components/Header
 * --------------------------------------------------
 */
+
 .header {
   align-items: center;
   flex-direction: row;
@@ -190,6 +191,12 @@ button.reset:hover:not(:has(> *)) {
   font-family: HelveticaOwn, sans-serif;
   font-size: 0.85rem;
   margin-bottom: 2.5rem;
+}
+
+
+.header a:hover {
+  text-decoration: none!important;
+  opacity: 0.5;
 }
 
 .header-password {
@@ -209,7 +216,7 @@ main#password {
   display: flex;
   align-items: center;
   flex-direction: row;
-  text-decoration: none!important;
+  text-decoration: none
 }
 
 #header-logo-text {
