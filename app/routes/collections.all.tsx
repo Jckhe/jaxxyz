@@ -94,7 +94,7 @@ function ProductItem({
       )}
       <h5>{product.title.toUpperCase()}</h5>
       <small>
-        <Money data={product.priceRange.minVariantPrice} withoutTrailingZeros={true} />
+        <Money data={product.priceRange.minVariantPrice} style={{color: '#665F5F'}} withoutTrailingZeros={true} />
       </small>
     </Link>
   );
